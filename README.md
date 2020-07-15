@@ -1,2 +1,2 @@
-# MPCC
-MPCC Official implementation soon
+# MPCC: Matching Priors and Conditionals for Clustering
+Official implementation soon
