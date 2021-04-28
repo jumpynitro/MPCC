@@ -16,4 +16,5 @@ CUDA_VISIBLE_DEVICES=0 python train_iter.py \
 --G_ch 96 --D_ch 96 \
 --num_E_steps 4 \
 --is_loss3 0.01 \
---test_every 5000 --save_every 2000 --num_best_copies 3 --num_save_copies 2 --seed 5
+--concat \
+--test_every 5000 --save_every 2000 --num_best_copies 3 --num_save_copies 2 --seed 0

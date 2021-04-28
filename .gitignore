@@ -1,0 +1,8 @@
+data
+data_cifar10
+C10_inception_moments.npz
+weights
+logs
+.ipynb_checkpoints
+samples_test
+__pycache__
