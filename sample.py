@@ -18,6 +18,7 @@ import torchvision
 import inception_utils
 import utils
 import losses
+import layers
 
 
 
@@ -59,9 +60,9 @@ def run(config):
   experiment_name = (config['experiment_name'] if config['experiment_name']
                        else utils.name_from_config(config))
   print('Experiment name is %s' % experiment_name)
-  
-  G = model.Generator(**config).cuda()
-  utils.count_parameters(G)
+
+  Prior   = layers.Prior(**config).cuda()
+  G       = model.Generator(**config).cuda()
   
   # Load weights
   print('Loading weights...')
@@ -69,13 +70,17 @@ def run(config):
   utils.load_weights(G if not (config['use_ema']) else None, None, state_dict, 
                      config['weights_root'], experiment_name, config['load_weights'],
                      G if config['ema'] and config['use_ema'] else None,
-                     strict=False, load_optim=False)
+                     strict=False, load_optim=False, 
+                     Prior = Prior if not config['prior_type'] == 'default' else None)
+ 
   # Update batch size setting used for G
   G_batch_size = max(config['G_batch_size'], config['batch_size']) 
   z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
                              device=device, fp16=config['G_fp16'], 
                              z_var=config['z_var'])
-  
+  Prior.z_ = z_
+  Prior.y_ = y_
+
   if config['G_eval_mode']:
     print('Putting G in eval mode..')
     G.eval()
@@ -83,7 +88,7 @@ def run(config):
     print('G is in %s mode...' % ('training' if G.training else 'eval'))
     
   #Sample function
-  sample = functools.partial(utils.sample, G=G, z_=z_, y_=y_, config=config)  
+  sample = functools.partial(utils.sample, G=G, Prior=Prior, config=config)  
   if config['accumulate_stats']:
     print('Accumulating standing stats across %d accumulations...' % config['num_standing_accumulations'])
     utils.accumulate_standing_stats(G, z_, y_, config['n_classes'],
